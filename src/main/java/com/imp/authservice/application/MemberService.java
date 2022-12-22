@@ -3,6 +3,7 @@ package com.imp.authservice.application;
 import com.imp.authservice.application.dto.MemberCreateRequest;
 import com.imp.authservice.application.dto.MemberFindResponse;
 import com.imp.authservice.application.dto.MemberLoginRequest;
+import com.imp.authservice.clientserver.dto.MemberResponse;
 import com.imp.authservice.domain.Member;
 import com.imp.authservice.domain.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,17 @@ public class MemberService {
         foundMember.validatePassword(memberLoginRequest.getPassword());
         sessionManager.login(foundMember.getId());
         return foundMember.getId();
+    }
+
+    public MemberResponse findForClient(final Long id) {
+        final boolean exists = memberRepository.existsById(id);
+        final Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("member not found by email"));
+
+        return MemberResponse
+                .builder()
+                .isExist(exists)
+                .isSellerOrAdmin(member.isSellerOrAdmin())
+                .build();
     }
 }
